@@ -2,7 +2,7 @@
 Name : Syed Talha
 BlazerID: smtalha
 Course section: 632
-Homework #: 1 
+Homework #: 2 
 */
 
 #include <stdlib.h>
@@ -20,6 +20,7 @@ void start_generations(int** board, int boardSize, int max_iterations);
 void copy_int_matrix(int** source, int** target, int rows, int columns);
 int is_matrix_equal(int** source, int** target, int rows, int columns);
 double gettime();
+void write_to_file(char * fileName, char * str);
 
 int main(int argc, char * argv[]) {
     if(argc < 3) {
@@ -45,7 +46,7 @@ int main(int argc, char * argv[]) {
 
     populate_ghost_cells(board, boardSize, boardSize);
 
-    printf("Initial Board:\n\n");
+    //printf("Initial Board:\n\n");
     //print_int_matrix(board, boardSize + 2, boardSize + 2);
 
     start_generations(board, boardSize, maxGenerations);
@@ -58,7 +59,10 @@ int main(int argc, char * argv[]) {
     double minutes = seconds / 60.0;
     double hours = minutes / 60.0;
 
-    printf("\nTime taken = %lf seconds or %lf minutes or %lf hours.\n", seconds, minutes, hours);
+    char output[300];
+    sprintf(output, "Board Size: %d\nMax Generations: %d\n\nTime taken = %lf seconds or %lf minutes or %lf hours.\n", boardSize, maxGenerations, seconds, minutes, hours);
+    write_to_file("output.txt", output);
+    //printf("\nTime taken = %lf seconds or %lf minutes or %lf hours.\n", seconds, minutes, hours);
 
     return 0;
 }
@@ -189,7 +193,7 @@ void start_generations(int** board, int boardSize, int max_iterations) {
         numOfIterations++;
 
         //Comment the following print statements for larger board sizes
-        printf("Generation %d:\n\n", numOfIterations);
+        //printf("Generation %d:\n\n", numOfIterations);
         //print_int_matrix(currentGeneration, boardSize + 2, boardSize + 2);
         
     } while(numOfIterations != max_iterations && is_matrix_equal(previousGeneration, currentGeneration, boardSize + 2, boardSize + 2) == 0);
@@ -225,4 +229,10 @@ double gettime() {
   gettimeofday(&tval, NULL);
 
   return( (double)tval.tv_sec + (double)tval.tv_usec/1000000.0 );
+}
+
+void write_to_file(char * fileName, char * str) {
+    FILE * fp = fopen(fileName, "w");
+    fprintf(fp, str);
+    fclose(fp);
 }
