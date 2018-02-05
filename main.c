@@ -60,7 +60,7 @@ int main(int argc, char * argv[]) {
     double hours = minutes / 60.0;
 
     char output[300];
-    sprintf(output, "Board Size: %d\nMax Generations: %d\n\nTime taken = %lf seconds or %lf minutes or %lf hours.\n", boardSize, maxGenerations, seconds, minutes, hours);
+    sprintf(output, "Board Size: %d\nMax Generations: %d\n\nTime taken = %lf seconds or %lf minutes or %lf hours.\n\n", boardSize, maxGenerations, seconds, minutes, hours);
     write_to_file("output.txt", output);
     //printf("\nTime taken = %lf seconds or %lf minutes or %lf hours.\n", seconds, minutes, hours);
 
