@@ -232,7 +232,7 @@ double gettime() {
 }
 
 void write_to_file(char * fileName, char * str) {
-    FILE * fp = fopen(fileName, "w");
+    FILE * fp = fopen(fileName, "a");
     fprintf(fp, str);
     fclose(fp);
 }
