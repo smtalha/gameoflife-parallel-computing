@@ -49,7 +49,9 @@ int main(int argc, char * argv[]) {
     //printf("Initial Board:\n\n");
     //print_int_matrix(board, boardSize + 2, boardSize + 2);
 
-    int actualNumOfGenerations = start_generations(board, boardSize, maxGenerations, numOfThreads);
+    int actualNumOfGenerations;
+    #pragma omp parallel num_threads(numOfThreads)
+    actualNumOfGenerations = start_generations(board, boardSize, maxGenerations, numOfThreads);
 
     free_int_matrix(board, boardSize + 2);
 
@@ -60,9 +62,9 @@ int main(int argc, char * argv[]) {
     double hours = minutes / 60.0;
 
     char output[300];
-    sprintf(output, "Board Size: %d\nMax Generations: %d\nActual Number of Generations: %d\n\nTime taken = %lf seconds or %lf minutes or %lf hours.\n\n", boardSize, maxGenerations, actualNumOfGenerations, seconds, minutes, hours);
+    sprintf(output, "Board Size: %d\nMax Generations: %d\nActual Number of Generations: %d\nThreads: %d\n\nTime taken = %lf seconds or %lf minutes or %lf hours.\n\n", boardSize, maxGenerations, actualNumOfGenerations, numOfThreads, seconds, minutes, hours);
     write_to_file("output.txt", output);
-    //printf("\nTime taken = %lf seconds or %lf minutes or %lf hours.\n", seconds, minutes, hours);
+    //printf("\nTime taken = %lf seconds or %lf minutes or %lf hours.\nGenerations: %d\Threads: %d\n", seconds, minutes, hours, actualNumOfGenerations, numOfThreads);
 
     return 0;
 }
@@ -173,6 +175,7 @@ int start_generations(int** board, int boardSize, int max_iterations, int numOfT
     for(numOfIterations = 0; numOfIterations < max_iterations && flag != 0; numOfIterations++) {
         flag = 0;
        
+        #pragma omp for private(i, j, numOfAliveNeighbors)
         for(i = 1; i <= boardSize; i++) {
             for(j = 1; j <= boardSize; j++) {
                 numOfAliveNeighbors = count_alive_neighbors(board, i, j);
@@ -180,19 +183,23 @@ int start_generations(int** board, int boardSize, int max_iterations, int numOfT
                 if(board[i][j] == 1) {//if the cell is alive                    
                     if(numOfAliveNeighbors != 2 && numOfAliveNeighbors != 3) {
                         board[i][j] = 0;
+                        #pragma omp critical
                         flag++;
                     }
                 } else {//if the cell is dead                    
                     if(numOfAliveNeighbors == 3) {
                         board[i][j] = 1;
+                        #pragma omp critical
                         flag++;
                     }
                 }
             }
+            //printf("Generation %d: Thread: %d\n\n", numOfIterations, omp_get_thread_num());
         }
 
         //Comment the following print statements for larger board sizes
-        //printf("Generation %d:\n\n", numOfIterations);
+        //printf("Generation %d: Thread: %d\n\n", numOfIterations, omp_get_thread_num());
+        //printf("Flag: %d\n\n", flag);
         //print_int_matrix(board, boardSize + 2, boardSize + 2);
     }
 
