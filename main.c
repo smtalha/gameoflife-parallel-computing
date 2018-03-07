@@ -49,9 +49,7 @@ int main(int argc, char * argv[]) {
     //printf("Initial Board:\n\n");
     //print_int_matrix(board, boardSize + 2, boardSize + 2);
 
-    int actualNumOfGenerations;
-    #pragma omp parallel num_threads(numOfThreads)
-    actualNumOfGenerations = start_generations(board, boardSize, maxGenerations, numOfThreads);
+    int actualNumOfGenerations = start_generations(board, boardSize, maxGenerations, numOfThreads);
 
     free_int_matrix(board, boardSize + 2);
 
@@ -172,6 +170,7 @@ int start_generations(int** board, int boardSize, int max_iterations, int numOfT
 
     int numOfAliveNeighbors;
 
+    #pragma omp parallel num_threads(numOfThreads) reduction(+:numOfIterations)
     for(numOfIterations = 0; numOfIterations < max_iterations && flag != 0; numOfIterations++) {
         flag = 0;
        
@@ -183,13 +182,11 @@ int start_generations(int** board, int boardSize, int max_iterations, int numOfT
                 if(board[i][j] == 1) {//if the cell is alive                    
                     if(numOfAliveNeighbors != 2 && numOfAliveNeighbors != 3) {
                         board[i][j] = 0;
-                        #pragma omp critical
                         flag++;
                     }
                 } else {//if the cell is dead                    
                     if(numOfAliveNeighbors == 3) {
                         board[i][j] = 1;
-                        #pragma omp critical
                         flag++;
                     }
                 }
@@ -203,7 +200,7 @@ int start_generations(int** board, int boardSize, int max_iterations, int numOfT
         //print_int_matrix(board, boardSize + 2, boardSize + 2);
     }
 
-    return numOfIterations;
+    return numOfIterations / numOfThreads;
 }
 
 double gettime() {
