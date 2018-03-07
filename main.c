@@ -170,11 +170,11 @@ int start_generations(int** board, int boardSize, int max_iterations, int numOfT
 
     int numOfAliveNeighbors;
 
-    #pragma omp parallel num_threads(numOfThreads) reduction(+:numOfIterations)
+    #pragma omp parallel num_threads(numOfThreads) private(i, j, numOfAliveNeighbors, numOfIterations)
     for(numOfIterations = 0; numOfIterations < max_iterations && flag != 0; numOfIterations++) {
         flag = 0;
        
-        #pragma omp for private(i, j, numOfAliveNeighbors)
+        #pragma omp for
         for(i = 1; i <= boardSize; i++) {
             for(j = 1; j <= boardSize; j++) {
                 numOfAliveNeighbors = count_alive_neighbors(board, i, j);
