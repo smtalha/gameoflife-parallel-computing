@@ -1,0 +1,23 @@
+setting dmc scratch directory
+ 
+============================================================
+=====         Summary of your script job               =====
+============================================================
+  The script file is: myscript.sh
+  The time limit is 14:00:00 HH:MM:SS.
+  The target directory is: /home/uabcls25/parallel-computing
+  The working directory is:  /scratch-local/uabcls25.hw3a.152909
+  The memory limit is: 20gb
+  The job will start running after: 2018-03-07T19:33:02
+  Job Name: hw3a
+  Virtual queue: class
+  QOS: --qos=class
+  Constraints: --constraint=dmc
+  Using  20  cores on master node  dmc2
+  Node list:  dmc2
+  Nodes:  dmc2 dmc2 dmc2 dmc2 dmc2 dmc2 dmc2 dmc2 dmc2 dmc2 dmc2 dmc2 dmc2 dmc2 dmc2 dmc2 dmc2 dmc2 dmc2 dmc2
+  Command typed:
+/apps/scripts/run_script myscript.sh     
+  Queue submit command:
+sbatch --qos=class -J hw3a --begin=2018-03-07T19:33:02 --requeue --mail-user=smtalha@uab.edu -o hw3a.o152909 -t 14:00:00 -N 1-1 -n 20 --mem-per-cpu=1000mb --constraint=dmc  
+Running problem size 5000 for 5000 iterations with 8 threads
