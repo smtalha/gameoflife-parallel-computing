@@ -17,7 +17,7 @@ void populate_ghost_cells(int** m, int rows, int columns);
 int count_alive_neighbors(int** m, int row, int column);
 void print_int_matrix(int** m, int rows, int columns);
 void free_int_matrix(int** m, int rows);
-int start_generations(int** board, int boardSize, int max_iterations, int numOfThreads);
+int start_generations(int** board, int** temp, int boardSize, int max_iterations, int numOfThreads);
 double gettime();
 void write_to_file(char * fileName, char * str);
 
@@ -36,6 +36,7 @@ int main(int argc, char * argv[]) {
     starttime = gettime();
 
     int** board = create_int_matrix(boardSize + 2, boardSize + 2);
+    int** temp = create_int_matrix(boardSize + 2, boardSize + 2);
 
     if(board == NULL) {
         printf("Unable to allocate memory.\n");
@@ -49,9 +50,10 @@ int main(int argc, char * argv[]) {
     //printf("Initial Board:\n\n");
     //print_int_matrix(board, boardSize + 2, boardSize + 2);
 
-    int actualNumOfGenerations = start_generations(board, boardSize, maxGenerations, numOfThreads);
+    int actualNumOfGenerations = start_generations(board, temp, boardSize, maxGenerations, numOfThreads);
 
     free_int_matrix(board, boardSize + 2);
+    free_int_matrix(temp, boardSize + 2);
 
     endtime = gettime();
 
@@ -62,7 +64,7 @@ int main(int argc, char * argv[]) {
     char output[300];
     sprintf(output, "Board Size: %d\nMax Generations: %d\nActual Number of Generations: %d\nThreads: %d\n\nTime taken = %lf seconds or %lf minutes or %lf hours.\n\n", boardSize, maxGenerations, actualNumOfGenerations, numOfThreads, seconds, minutes, hours);
     write_to_file("output.txt", output);
-    //printf("\nTime taken = %lf seconds or %lf minutes or %lf hours.\nGenerations: %d\Threads: %d\n", seconds, minutes, hours, actualNumOfGenerations, numOfThreads);
+    //printf("\nTime taken = %lf seconds or %lf minutes or %lf hours.\nGenerations: %d\nThreads: %d\n", seconds, minutes, hours, actualNumOfGenerations, numOfThreads);
 
     return 0;
 }
@@ -162,7 +164,9 @@ void free_int_matrix(int** m, int rows) {
     free(m);
 }
 
-int start_generations(int** board, int boardSize, int max_iterations, int numOfThreads) {
+int start_generations(int** board, int** temp, int boardSize, int max_iterations, int numOfThreads) {
+    int** ptr;
+    
     int flag = 1;
     int numOfIterations;
 
@@ -181,18 +185,22 @@ int start_generations(int** board, int boardSize, int max_iterations, int numOfT
                 
                 if(board[i][j] == 1) {//if the cell is alive                    
                     if(numOfAliveNeighbors != 2 && numOfAliveNeighbors != 3) {
-                        board[i][j] = 0;
+                        temp[i][j] = 0;
                         flag++;
                     }
                 } else {//if the cell is dead                    
                     if(numOfAliveNeighbors == 3) {
-                        board[i][j] = 1;
+                        temp[i][j] = 1;
                         flag++;
                     }
                 }
             }
-            //printf("Generation %d: Thread: %d\n\n", numOfIterations, omp_get_thread_num());
+            //printf("Generation %d: Thread: %d\n", numOfIterations, omp_get_thread_num());
         }
+
+        ptr = board;
+        board = temp;
+        temp = ptr;
 
         //Comment the following print statements for larger board sizes
         //printf("Generation %d: Thread: %d\n\n", numOfIterations, omp_get_thread_num());
