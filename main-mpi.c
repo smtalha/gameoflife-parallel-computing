@@ -116,7 +116,7 @@ int main(int argc, char * argv[]) {
 
     if (rank == 0) {
         char output[300];
-        sprintf(output, "Board Size: %d\nMax Generations: %d\nActual Number of Generations: %d\n\nTime taken = %lf seconds or %lf minutes or %lf hours.\n\n", board_size, max_generations, num_iterations, seconds, minutes, hours);
+        sprintf(output, "Board Size: %d\nMax Generations: %d\nActual Number of Generations: %d\nNumber of processes: %d\n\nTime taken = %lf seconds or %lf minutes or %lf hours.\n\n", board_size, max_generations, num_iterations, num_tasks, seconds, minutes, hours);
         write_to_file("output.txt", output);
         //printf("\nTime taken = %lf seconds or %lf minutes or %lf hours.\nGenerations: %d\n", seconds, minutes, hours, num_iterations);
     }
