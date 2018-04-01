@@ -21,7 +21,7 @@ double gettime();
 void write_to_file(char * fileName, char * str);
 
 int main(int argc, char * argv[]) {
-    if(argc < 4) {
+    if(argc < 3) {
         printf("Please provide [board-size] and [max-generations] as command-line arguments.\n");
         return 1;
     }
