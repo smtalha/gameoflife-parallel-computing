@@ -2,12 +2,13 @@
 Name : Syed Talha
 BlazerID: smtalha
 Course section: 632
-Homework #: 2
+Homework #: 3 
 */
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/time.h>
+#include <omp.h>
 
 //function signatures
 int** create_int_matrix(int rows, int columns);
@@ -16,18 +17,19 @@ void populate_ghost_cells(int** m, int rows, int columns);
 int count_alive_neighbors(int** m, int row, int column);
 void print_int_matrix(int** m, int rows, int columns);
 void free_int_matrix(int** m, int rows);
-int start_generations(int** board, int** temp, int boardSize, int max_iterations);
+int start_generations(int** board, int** temp, int boardSize, int max_iterations, int numOfThreads);
 double gettime();
 void write_to_file(char * fileName, char * str);
 
 int main(int argc, char * argv[]) {
     if(argc < 4) {
-        printf("Please provide [board-size] and [max-generations] as command-line arguments.\n");
+        printf("Please provide [board-size], [max-generations] and [number-of-threads] as command-line arguments.\n");
         return 1;
     }
 
     int boardSize = atoi(argv[1]);
     int maxGenerations = atoi(argv[2]);
+    int numOfThreads = atoi(argv[3]);
 
     double starttime, endtime;
 
@@ -48,7 +50,7 @@ int main(int argc, char * argv[]) {
     //printf("Initial Board:\n\n");
     //print_int_matrix(board, boardSize + 2, boardSize + 2);
 
-    int actualNumOfGenerations = start_generations(board, temp, boardSize, maxGenerations);
+    int actualNumOfGenerations = start_generations(board, temp, boardSize, maxGenerations, numOfThreads);
 
     free_int_matrix(board, boardSize + 2);
     free_int_matrix(temp, boardSize + 2);
@@ -60,9 +62,9 @@ int main(int argc, char * argv[]) {
     double hours = minutes / 60.0;
 
     char output[300];
-    sprintf(output, "Board Size: %d\nMax Generations: %d\nActual Number of Generations: %d\n\nTime taken = %lf seconds or %lf minutes or %lf hours.\n\n", boardSize, maxGenerations, actualNumOfGenerations, seconds, minutes, hours);
+    sprintf(output, "Board Size: %d\nMax Generations: %d\nActual Number of Generations: %d\nThreads: %d\n\nTime taken = %lf seconds or %lf minutes or %lf hours.\n\n", boardSize, maxGenerations, actualNumOfGenerations, numOfThreads, seconds, minutes, hours);
     write_to_file("output.txt", output);
-    //printf("\nTime taken = %lf seconds or %lf minutes or %lf hours.\nGenerations: %d\n", seconds, minutes, hours, actualNumOfGenerations);
+    //printf("\nTime taken = %lf seconds or %lf minutes or %lf hours.\nGenerations: %d\nThreads: %d\n", seconds, minutes, hours, actualNumOfGenerations, numOfThreads);
 
     return 0;
 }
@@ -162,7 +164,7 @@ void free_int_matrix(int** m, int rows) {
     free(m);
 }
 
-int start_generations(int** board, int** temp, int boardSize, int max_iterations) {
+int start_generations(int** board, int** temp, int boardSize, int max_iterations, int numOfThreads) {
     int** ptr;
     
     int flag = 1;
@@ -172,9 +174,11 @@ int start_generations(int** board, int** temp, int boardSize, int max_iterations
 
     int numOfAliveNeighbors;
 
+    #pragma omp parallel num_threads(numOfThreads) private(i, j, numOfAliveNeighbors, numOfIterations)
     for(numOfIterations = 0; numOfIterations < max_iterations && flag != 0; numOfIterations++) {
         flag = 0;
        
+        #pragma omp for
         for(i = 1; i <= boardSize; i++) {
             for(j = 1; j <= boardSize; j++) {
                 numOfAliveNeighbors = count_alive_neighbors(board, i, j);
@@ -191,7 +195,7 @@ int start_generations(int** board, int** temp, int boardSize, int max_iterations
                     }
                 }
             }
-            //printf("Generation %d\n", numOfIterations);
+            //printf("Generation %d: Thread: %d\n", numOfIterations, omp_get_thread_num());
         }
 
         ptr = board;
@@ -199,12 +203,12 @@ int start_generations(int** board, int** temp, int boardSize, int max_iterations
         temp = ptr;
 
         //Comment the following print statements for larger board sizes
-        //printf("Generation %d:\n\n", numOfIterations);
+        //printf("Generation %d: Thread: %d\n\n", numOfIterations, omp_get_thread_num());
         //printf("Flag: %d\n\n", flag);
         //print_int_matrix(board, boardSize + 2, boardSize + 2);
     }
 
-    return numOfIterations;
+    return numOfIterations / numOfThreads;
 }
 
 double gettime() {
