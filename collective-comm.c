@@ -21,6 +21,7 @@ void linear(int rank, int num_tasks, int* arr, int size);
 void ring(int rank, int num_tasks, int* arr, int size);
 void double_ring(int rank, int num_tasks, int* arr, int size);
 void tree(int rank, int num_tasks, int* arr, int size);
+double reduce_max_double(double value, int rank, int num_tasks);
 
 int main(int argc, char * argv[]) {
     if(argc < 2) {
@@ -100,7 +101,7 @@ void linear(int rank, int num_tasks, int* arr, int size) {
     local_finish = MPI_Wtime();
     local_elapsed = local_finish - local_start;
 
-    MPI_Reduce(&local_elapsed, &elapsed, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+    elapsed = reduce_max_double(local_elapsed, rank, num_tasks);
 
     if(rank == 0) {
         if(DEBUG) {
@@ -144,7 +145,7 @@ void ring(int rank, int num_tasks, int* arr, int size) {
     local_finish = MPI_Wtime();
     local_elapsed = local_finish - local_start;
 
-    MPI_Reduce(&local_elapsed, &elapsed, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+    elapsed = reduce_max_double(local_elapsed, rank, num_tasks);
 
     if(rank == 0) {
         if(DEBUG) {
@@ -206,7 +207,7 @@ void double_ring(int rank, int num_tasks, int* arr, int size) {
     local_finish = MPI_Wtime();
     local_elapsed = local_finish - local_start;
 
-    MPI_Reduce(&local_elapsed, &elapsed, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+    elapsed = reduce_max_double(local_elapsed, rank, num_tasks);
 
     if(rank == 0) {
         if(DEBUG) {
@@ -253,7 +254,7 @@ void tree(int rank, int num_tasks, int* arr, int size) {
     local_finish = MPI_Wtime();
     local_elapsed = local_finish - local_start;
 
-    MPI_Reduce(&local_elapsed, &elapsed, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+    elapsed = reduce_max_double(local_elapsed, rank, num_tasks);
 
     if(rank == 0) {
         if(DEBUG) {
@@ -266,6 +267,32 @@ void tree(int rank, int num_tasks, int* arr, int size) {
             write_to_file("output.txt", output);
         }
     }
+}
+
+double reduce_max_double(double value, int rank, int num_tasks) {
+    double max = value;
+    double temp;
+    int peer;
+    int finished = 0;
+    unsigned btmsk = (unsigned) 1;
+
+    while (!finished && btmsk < num_tasks) {
+        peer = rank ^ btmsk;
+        if (rank < peer) {
+            if (peer < num_tasks) {
+                MPI_Recv(&temp, 1, MPI_DOUBLE, peer, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                if(temp > max) {
+                    max = temp;
+                }
+            }
+            btmsk <<= 1;
+        } else {
+            MPI_Send(&max, 1, MPI_DOUBLE, peer, 0, MPI_COMM_WORLD); 
+            finished = 1;
+        }
+    }
+
+    return max;
 }
 
 int* create_int_array(int size) {
