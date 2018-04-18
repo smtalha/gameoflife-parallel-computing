@@ -106,11 +106,11 @@ void linear(int rank, int num_tasks, int* arr, int size) {
     if(rank == 0) {
         if(DEBUG) {
             //Print output to console
-            printf("Processes: %d\tMessage Size:%8d\tTime taken = %lf seconds.\n", num_tasks, size*sizeof(int), elapsed);
+            printf("Comm: Linear\tProcesses: %d\tMessage Size:%8d\tTime taken = %lf seconds.\n", num_tasks, size*sizeof(int), elapsed);
         } else {
             //Write output to file
             char output[300];
-            sprintf(output, "Processes: %d\tMessage Size: %8d\tTime taken = %lf seconds.\n", num_tasks, size*sizeof(int), elapsed);
+            sprintf(output, "Comm: Linear\tProcesses: %d\tMessage Size: %8d\tTime taken = %lf seconds.\n", num_tasks, size*sizeof(int), elapsed);
             write_to_file("output.txt", output);
         }
     }
@@ -150,11 +150,11 @@ void ring(int rank, int num_tasks, int* arr, int size) {
     if(rank == 0) {
         if(DEBUG) {
             //Print output to console
-            printf("Processes: %d\tMessage Size:%8d\tTime taken = %lf seconds.\n", num_tasks, size*sizeof(int), elapsed);
+            printf("Comm: Ring\tProcesses: %d\tMessage Size:%8d\tTime taken = %lf seconds.\n", num_tasks, size*sizeof(int), elapsed);
         } else {
             //Write output to file
             char output[300];
-            sprintf(output, "Processes: %d\tMessage Size: %8d\tTime taken = %lf seconds.\n", num_tasks, size*sizeof(int), elapsed);
+            sprintf(output, "Comm: Ring\tProcesses: %d\tMessage Size: %8d\tTime taken = %lf seconds.\n", num_tasks, size*sizeof(int), elapsed);
             write_to_file("output.txt", output);
         }
     }
@@ -212,11 +212,11 @@ void double_ring(int rank, int num_tasks, int* arr, int size) {
     if(rank == 0) {
         if(DEBUG) {
             //Print output to console
-            printf("Processes: %d\tMessage Size:%8d\tTime taken = %lf seconds.\n", num_tasks, size*sizeof(int), elapsed);
+            printf("Comm: Double-Ring\tProcesses: %d\tMessage Size:%8d\tTime taken = %lf seconds.\n", num_tasks, size*sizeof(int), elapsed);
         } else {
             //Write output to file
             char output[300];
-            sprintf(output, "Processes: %d\tMessage Size: %8d\tTime taken = %lf seconds.\n", num_tasks, size*sizeof(int), elapsed);
+            sprintf(output, "Comm: Double-Ring\tProcesses: %d\tMessage Size: %8d\tTime taken = %lf seconds.\n", num_tasks, size*sizeof(int), elapsed);
             write_to_file("output.txt", output);
         }
     }
@@ -259,11 +259,11 @@ void tree(int rank, int num_tasks, int* arr, int size) {
     if(rank == 0) {
         if(DEBUG) {
             //Print output to console
-            printf("Processes: %d\tMessage Size:%8d\tTime taken = %lf seconds.\n", num_tasks, size*sizeof(int), elapsed);
+            printf("Comm: Tree\tProcesses: %d\tMessage Size:%8d\tTime taken = %lf seconds.\n", num_tasks, size*sizeof(int), elapsed);
         } else {
             //Write output to file
             char output[300];
-            sprintf(output, "Processes: %d\tMessage Size: %8d\tTime taken = %lf seconds.\n", num_tasks, size*sizeof(int), elapsed);
+            sprintf(output, "Comm: Tree\tProcesses: %d\tMessage Size: %8d\tTime taken = %lf seconds.\n", num_tasks, size*sizeof(int), elapsed);
             write_to_file("output.txt", output);
         }
     }
