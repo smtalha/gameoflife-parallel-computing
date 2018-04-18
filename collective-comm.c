@@ -200,15 +200,31 @@ void double_ring(int rank, int num_tasks, int* arr, int size) {
 
     local_start = MPI_Wtime();
 
+    if(rank == 0) {
+        MPI_Send(arr, size, MPI_INT, num_tasks - 1, 0, MPI_COMM_WORLD);  
+    }
+    
+    if(rank == num_tasks - 1) {
+        MPI_Recv(arr, size, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
+        if(DEBUG) {
+            printf("Rank %d ----> Rank %d.\n", status.MPI_SOURCE, rank);
+        }
+    }
+
     int middle = num_tasks / 2;
 
     int prev = rank - 1;
     int next = rank + 1;
 
-    if(rank <= middle) {
-        if(rank == 0) {
-            MPI_Send(arr, size, MPI_INT, num_tasks - 1, 0, MPI_COMM_WORLD);  
-        }
+    if(prev < 0) {
+        prev = 0;
+    }
+
+    if(next >= num_tasks) {
+        next = num_tasks - 1;
+    }
+
+    if(rank <= middle) {        
         if(rank != middle) {
             MPI_Send(arr, size, MPI_INT, next, 1, MPI_COMM_WORLD);
         }
@@ -218,13 +234,7 @@ void double_ring(int rank, int num_tasks, int* arr, int size) {
                 printf("Rank %d ----> Rank %d.\n", status.MPI_SOURCE, rank);
             }
         }
-    } else {        
-        if(rank == num_tasks - 1) {
-            MPI_Recv(arr, size, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
-            if(DEBUG) {
-                printf("Rank %d ----> Rank %d.\n", status.MPI_SOURCE, rank);
-            }
-        }
+    } else {    
         if(rank != middle + 1) {
             MPI_Send(arr, size, MPI_INT, prev, 2, MPI_COMM_WORLD);
         }
