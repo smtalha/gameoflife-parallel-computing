@@ -17,6 +17,7 @@ Homework #: 5
 void write_to_file(char * file_name, char * str);
 int* create_int_array(int size);
 void initialize_int_array(int* arr, int size);
+void single_process(int* arr, int size);
 void linear(int rank, int num_tasks, int* arr, int size);
 void ring(int rank, int num_tasks, int* arr, int size);
 void double_ring(int rank, int num_tasks, int* arr, int size);
@@ -53,29 +54,60 @@ int main(int argc, char * argv[]) {
             initialize_int_array(arr, size);
         }
 
-        switch(comm_type) {
-            case 1:
-                linear(rank, num_tasks, arr, size);
-                break;
-            case 2:
-                ring(rank, num_tasks, arr, size);
-                break;
-            case 3:
-                double_ring(rank, num_tasks, arr, size);
-                break;
-            case 4:
-                tree(rank, num_tasks, arr, size);
-                break;
-            default:
-                break;
+        if(num_tasks == 1) {
+            single_process(arr, size);
+        } else {
+            switch(comm_type) {
+                case 1:
+                    linear(rank, num_tasks, arr, size);
+                    break;
+                case 2:
+                    ring(rank, num_tasks, arr, size);
+                    break;
+                case 3:
+                    double_ring(rank, num_tasks, arr, size);
+                    break;
+                case 4:
+                    tree(rank, num_tasks, arr, size);
+                    break;
+                default:
+                    break;
+            }
         }
+
         exp++;
         free(arr);
-    }
+    }    
     
     MPI_Finalize();
 
     return 0;
+}
+
+void single_process(int* arr, int size) {
+    MPI_Request reqs[2];
+    MPI_Status stats[2];
+    double start, finish, elapsed;
+
+    start = MPI_Wtime();
+
+    MPI_Irecv(arr, size, MPI_INT, 0, 0, MPI_COMM_WORLD, &reqs[0]);
+    MPI_Isend(arr, size, MPI_INT, 0, 0, MPI_COMM_WORLD, &reqs[1]);
+
+    MPI_Waitall(2, reqs, stats);
+
+    finish = MPI_Wtime();
+    elapsed = finish - start;
+
+    if(DEBUG) {
+        //Print output to console
+        printf("Comm: Linear\tProcesses: 1\tMessage Size:%8d\tTime taken = %lf seconds.\n", size*sizeof(int), elapsed);
+    } else {
+        //Write output to file
+        char output[300];
+        sprintf(output, "Comm: Linear\tProcesses: 1\tMessage Size: %8d\tTime taken = %lf seconds.\n", size*sizeof(int), elapsed);
+        write_to_file("output.txt", output);
+    }
 }
 
 void linear(int rank, int num_tasks, int* arr, int size) {
@@ -310,7 +342,7 @@ int* create_int_array(int size) {
 void initialize_int_array(int* arr, int size) {
     int i;
     for(i = 0; i < size; i++) {
-        arr[i] = 0;
+        arr[i] = 1;
     }
 }
 
